@@ -2,17 +2,19 @@
 
 sleep 10
 
-if [ !  -r /var/www/wordpress/wp-config.php ]; then
-    wp config create --allow-root \
-        --dbname=$MYSQL_DATABASE \
-        --dbuser=$MYSQL_USER \
-        --dbpass=$MYSQL_PASSWORD \
-        --dbhost=$mariadb:3306 --path='/var/www/wordpress'
-fi        
-if [ ! -r /run/php ]; then
-    mkdir /run/php
+if [ ! wp-config.php ]; then
+    wp config create	--allow-root \
+                --dbname=$SQL_DATABASE \
+                --dbuser=$SQL_USER \
+                --dbpass=$SQL_PASSWORD \
+                --dbhost=mariadb:3306 --path='/var/www/wordpress'
+
 fi
-if [ ! -r /home/abiddane/data/wordpress ]; then
-    mkdir -p /home/abiddane/data/wordpress
+
+if [ ! /run/php ]; then
+   mkdir -p /run/php
+
 fi
-/usr/sbin/php-fpm7.3 -F           
+
+# wp core install --allow-root --title=Example --admin_user="${WP_ADMIN}" --admin_password="${WP_ADMIN_PASSWORD}" --admin_email="${WP_ADMIN_EMAIL}"
+# wp user create bob bob@example.com --allow-root --user_pass="${WP_USER_PASS}"
