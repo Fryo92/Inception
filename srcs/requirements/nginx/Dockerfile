@@ -1,17 +1,31 @@
-FROM debian:bullseye
 
-RUN apt update -y
-RUN apt upgrade -y
-RUN apt install nginx -y
+# this dockerfile is used to build the image for the nginx container
+FROM	debian:bullseye
 
-RUN mkdir -p /etc/nginx/ssl
-RUN apt install openssl -y
-RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=abiddane.42.fr/UID=abiddane"
-RUN mkdir -p /var/run/nginx
+EXPOSE	443
 
-COPY conf/nginx.conf /etc/nginx/nginx.conf
-RUN mkdir -p /var/www/wordpress
-RUN chmod 755 /var/www/wordpress
-RUN chown www-data:www-data /var/www/wordpress
+RUN		apt update && apt install -y --no-install-recommends --no-install-suggests \
+		nginx \
+		openssl && \
+		rm -rf /var/lib/apt/lists/*
 
-CMD ["nginx", "-g", "daemon off;"]
+ARG		CERT_FOLDER CERTIFICATE KEY COUNTRY STATE LOCALITY ORGANIZATION UNIT COMMON_NAME
+
+RUN mkdir -p ${CERT_FOLDER} && \
+	openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
+    -out ${CERTIFICATE} \
+    -keyout ${KEY} \
+    -subj "/C=${COUNTRY}/ST=${STATE}/L=${LOCALITY}/O=${ORGANIZATION}/OU=${UNIT}/CN=${COMMON_NAME}"
+
+COPY	conf/nginx.conf	/etc/nginx/
+COPY	conf/server.conf	/etc/nginx/conf.d/
+
+RUN		echo "\tserver name ${COMMON_NAME};\n\
+			\tssl_certificate ${CERTIFICATE};\n\
+			\tssl_certificate_key ${KEY};\n\
+			}" >> /etc/nginx/conf.d/server.conf
+
+RUN		mkdir -p /var/www/
+RUN		chown -R www-data:www-data /var/www/
+
+CMD		["nginx", "-g", "daemon off;"]

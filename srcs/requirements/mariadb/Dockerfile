@@ -1,14 +1,17 @@
 FROM debian:bullseye
 
-RUN apt update -y
-RUN apt upgrade -y
-RUN apt install mariadb-server mariadb-client -y
+EXPOSE 3306
 
-COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+RUN	apt update && \
+	apt install -y --no-install-recommends --no-install-suggests \
+	mariadb-server && \
+	rm -rf /var/lib/apt/lists/*
+
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 
 COPY ./tools/run.sh /run.sh
 
 RUN chmod +x /run.sh
 
 
-ENTRYPOINT ["/run.sh"]
+CMD ["/run.sh", "mysqld_safe"]
