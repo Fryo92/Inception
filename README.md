@@ -9,3 +9,5 @@ C'est une implémentation de Wordpress avec une base de donnée Mariadb via un s
 ### LANCEMENT
 
 make
+
+Connection à https://localhost:443
